@@ -1,2 +1,4 @@
 .idea/
 __pycache__/
+model_ir_se50.pth
+data
