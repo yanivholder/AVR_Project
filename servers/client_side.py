@@ -34,7 +34,7 @@ def main():
             time = datetime.now()
             message = cam_streamer.pickle_data_for_packet(frame)
             sock.sendall(message)
-            logging.info("frame {}  time {} ".format(counter,  (datetime.now() - time).total_seconds()))
+            # logging.info("frame {}  time {} ".format(counter,  (datetime.now() - time).total_seconds()))
 
             # Receive data back from the server
             updated_data = cam_streamer.get_frame_from_socket(sock)
