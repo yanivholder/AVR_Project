@@ -7,7 +7,6 @@ RECV_SIZE = 4 * 1024  # 4 KB
 
 
 def gen_frame():
-
     # Define a video capture object
     cap = cv2.VideoCapture(0)
     if not cap.isOpened():

@@ -1,6 +1,5 @@
 import abc
 import pandas as pd
-import face_recognition
 from typing import List
 from cv2 import dnn, resize
 
@@ -10,21 +9,21 @@ class FaceDetector:
     def detect_picture(self, frame) -> List:
         pass
 
-
-class FaceRecognition(FaceDetector):
-    def __init__(self, model='hog', number_of_times_to_upsample: int = 2):
-        self.model = model
-        self.number_of_times_to_upsample = number_of_times_to_upsample
-
-    def detect_picture(self, frame):
-        return face_recognition.face_locations(frame, model=self.model, number_of_times_to_upsample=self.number_of_times_to_upsample)
-
+#
+# class FaceRecognition(FaceDetector):
+#     def __init__(self, model='hog', number_of_times_to_upsample: int = 2):
+#         self.model = model
+#         self.number_of_times_to_upsample = number_of_times_to_upsample
+#
+#     def detect_picture(self, frame):
+#         return face_recognition.face_locations(frame, model=self.model, number_of_times_to_upsample=self.number_of_times_to_upsample)
 
 class SSDDetection:
-    def __init__(self, tolerance: float = 0.8):
+    def __init__(self, tolerance: float = 0.5, increase_ratio=0):
         self.detector = dnn.readNetFromCaffe("deploy.prototxt.txt", "res10_300x300_ssd_iter_140000.caffemodel")
         self.target_size = (300, 300)
         self.tolerance = tolerance
+        self.increase_ratio = increase_ratio
 
     def detect_picture(self, frame) -> List:
         small_frame = resize(frame, self.target_size)
@@ -39,10 +38,10 @@ class SSDDetection:
         faces = []
 
         for i, instance in detections_df.iterrows():
-            left = int(instance["left"] * 300 * aspect_ratio_x)
-            bottom = int(instance["bottom"] * 300 * aspect_ratio_y)
-            right = int(instance["right"] * 300 * aspect_ratio_x)
-            top = int(instance["top"] * 300 * aspect_ratio_y)
+            left = max(0, int((instance["left"] * 300 * aspect_ratio_x) - self.increase_ratio))
+            bottom = min(int((instance["bottom"] * 300 * aspect_ratio_y) + self.increase_ratio), frame.shape[0])
+            right = min(int((instance["right"] * 300 * aspect_ratio_x) + self.increase_ratio), frame.shape[1])
+            top = max(0, int((instance["top"] * 300 * aspect_ratio_y) - self.increase_ratio))
 
             faces.append((top, right, bottom, left))
 

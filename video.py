@@ -2,9 +2,10 @@ import cv2
 import logging
 from datetime import datetime
 from cv2 import VideoCapture
-from detect_picture import DetectImage
 from draw_faces import BoxConfig, Draw
-from recognition import FaceRecognitionModel, DetectFace
+
+from detect_picture import DetectImage
+from recognition import FaceRecognitionModel, DetectFace, DeepFaceModel
 
 # This is a demo of running face recognition on a video file and saving the results to a new video file.
 #
@@ -12,12 +13,13 @@ from recognition import FaceRecognitionModel, DetectFace
 
 
 class VideoDetection:
-    def __init__(self, known_img_path: str,  frame_ratio: int = 2, model: str = 'hog', resize_ratio: float = 1):
+    def __init__(self, known_img_path: str,  frame_ratio: int = 2, resize_ratio: float = 1, increase_ratio=10,
+                 detector_backend='mtcnn', distance_metric='cosine'):
         self.frame_ratio = frame_ratio
         self.resize_ratio = resize_ratio
         self.box_drawer = Draw()
-        self.face_detector = DetectImage()
-        self.face_recognizer: DetectFace = FaceRecognitionModel(known_img_path)
+        self.face_detector = DetectImage(increase_ratio=increase_ratio)
+        self.face_recognizer: DetectFace = DeepFaceModel(known_img_path, distance_metric=distance_metric,  detector_backend=detector_backend)
 
     @staticmethod
     def create_video_setting(input_movie, output_path: str):
@@ -55,10 +57,10 @@ class VideoDetection:
                 rgb_frame = small_frame[:, :, ::-1]
 
                 time = datetime.now()
-                face_locations, face_names, scores = self.face_detector.detect(rgb_frame, self.face_recognizer)
+                face_locations, face_names, scores, face_detected = self.face_detector.detect(rgb_frame, self.face_recognizer)
                 delta_time = (datetime.now() - time).total_seconds()
-                logging.info("faces found {} with scores {} time {} frame {}".format(face_names, scores, delta_time,
-                                                                                     frame_number))
+                logging.info("faces found {} with scores {} detection_phase_number {} time {} frame {}".format(
+                    face_names, scores, face_detected, delta_time, frame_number))
                 face_locations = [self.mult_location_by_ratio(face_cor) for face_cor in face_locations]
 
             self.box_drawer.draw_faces(frame, box_config, face_locations, face_names, scores)

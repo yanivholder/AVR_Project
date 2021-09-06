@@ -1,27 +1,40 @@
-import face_recognition
 from recognition import DetectFace
 from detection import SSDDetection
+from multiprocessing.pool import ThreadPool
 
 
 class DetectImage:
-    def __init__(self, model: str = 'hog', number_of_times_to_upsample: int = 2):
-        self.model = model
-        self.number_of_times_to_upsample = number_of_times_to_upsample
-        self.detection_model = SSDDetection(tolerance=0.7)
+    def __init__(self, tolerance: float, increase_ratio: int = 0):
+        self.detection_model = SSDDetection(tolerance=tolerance, increase_ratio=increase_ratio)
 
     def detect(self, frame, face_detector: DetectFace):
+
+        def detect_face_wrap(args):
+            """ wrap detect_face func because in threads we want to save the index"""
+            face, index = args
+            try:
+                m_name, m_score = face_detector.detect_face(face)
+                return m_name, m_score, index
+            except (ZeroDivisionError, ValueError)as e:
+                return "error", "error", "error"
+
         # Find all the faces and face encodings in the current frame of video
-        # face_locations = face_recognition.face_locations(frame, model=self.model, number_of_times_to_upsample=self.number_of_times_to_upsample)
-        face_locations = self.detection_model.detect_picture(frame)
-        face_encodings = face_recognition.face_encodings(frame, face_locations)
+        face_suggestion = self.detection_model.detect_picture(frame)
+        faces = [frame[face_cor[0]: face_cor[2], face_cor[3]: face_cor[1]] for face_cor in face_suggestion]
 
         face_names = []
         scores = []
-        for face_encoding in face_encodings:
-            # See if the face is a match for the known face(s)
-            match_name, match_score = face_detector.detect_face(face_encoding)
-            face_names.append(match_name)
-            scores.append(None if match_score is None else 100 - int(100 * match_score))
+        face_locations = []
 
-        return face_locations, face_names, scores
+        if len(faces):
+            pool = ThreadPool(len(faces))
+            res = pool.map(detect_face_wrap, zip(faces, range(len(faces))))
 
+            for match_name, match_score, i in res:
+                if match_name != "error":
+                # See if the face is a match for the known face(s)
+                    face_names.append(match_name)
+                    scores.append(match_score)
+                    face_locations.append(face_suggestion[i])
+
+        return face_locations, face_names, scores, len(face_suggestion)
