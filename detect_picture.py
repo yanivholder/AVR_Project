@@ -1,11 +1,12 @@
 from recognition import DetectFace
-from detection import SSDDetection
+from detection import SSDDetection, Mtcnn
 from multiprocessing.pool import ThreadPool
 
 
 class DetectImage:
     def __init__(self, tolerance: float, increase_ratio: int = 0):
-        self.detection_model = SSDDetection(tolerance=tolerance, increase_ratio=increase_ratio)
+        # self.detection_model = SSDDetection(tolerance=tolerance, increase_ratio=increase_ratio)
+        self.detection_model = Mtcnn(tolerance=tolerance, increase_ratio=increase_ratio)
 
     def detect(self, frame, face_detector: DetectFace):
 

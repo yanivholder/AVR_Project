@@ -1,13 +1,10 @@
 import socket
 import cv2
-import logging
 from datetime import datetime
 
 import camera_stream.camera_streamer as cam_streamer
 
 HOST, PORT = "localhost", 9879
-logging.basicConfig(filename="servers/logs/client_logs_{}.txt".format(datetime.now().strftime("%m_%d_%H_%M")), filemode='w', level=logging.INFO)
-
 
 def main():
     # Define a video capture object

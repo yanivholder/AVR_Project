@@ -11,8 +11,10 @@ from abc import ABC
 
 from deepface.commons import distance as dst
 from deepface import DeepFace
-from deepface.basemodels import DeepID, DlibResNet, VGGFace, DlibWrapper, ArcFace
+from deepface.basemodels import DeepID, DlibResNet, VGGFace, DlibWrapper, ArcFace, FbDeepFace, Facenet512, Facenet
 from ImgParser import Parser
+
+from servers.server_config import recognition_threshold
 
 
 class DetectFace:
@@ -52,12 +54,12 @@ class DeepFaceModel(DetectFace, ABC):
     def __init__(self,
                  img_path,
                  distance_metric: str,
-                 model_name: str = 'ArcFace',
+                 model_name: str = 'Facenet512',
                  detector_backend: str = 'mtcnn'
                  ):
         super().__init__(img_path)
         self.model_name = model_name
-        self.model = ArcFace.loadModel()
+        self.model = Facenet512.loadModel()
         self.detector_backend = detector_backend
         self.distance_metric = distance_metric
         self.representation_path = "{}/representations_{}_{}.pkl".format(img_path, self.model_name, self.detector_backend)
@@ -96,7 +98,8 @@ class DeepFaceModel(DetectFace, ABC):
         threshold = dst.findThreshold(self.model_name, self.distance_metric)
         best = df.nsmallest(1, "score")
 
-        if float(best['score']) < threshold:
+        # threshold is a const from the deepface library, we add a const to improve
+        if float(best['score']) < threshold + recognition_threshold:
             return list(best['identity'])[0], float(best['score'])
         else:
             return None, None
@@ -137,7 +140,7 @@ class DeepFaceModel(DetectFace, ABC):
                                                 model=self.model,
                                                 enforce_detection=False,
                                                 detector_backend=self.detector_backend,
-                                                align=False
+                                                align=True
                                                 )
 
             instance.append(representation)

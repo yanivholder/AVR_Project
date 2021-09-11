@@ -18,7 +18,7 @@ class VideoDetection:
         self.frame_ratio = frame_ratio
         self.resize_ratio = resize_ratio
         self.box_drawer = Draw()
-        self.face_detector = DetectImage(increase_ratio=increase_ratio)
+        self.face_detector = DetectImage(tolerance=0.9, increase_ratio=increase_ratio)
         self.face_recognizer: DetectFace = DeepFaceModel(known_img_path, distance_metric=distance_metric,  detector_backend=detector_backend)
 
     @staticmethod
@@ -59,8 +59,8 @@ class VideoDetection:
                 time = datetime.now()
                 face_locations, face_names, scores, face_detected = self.face_detector.detect(rgb_frame, self.face_recognizer)
                 delta_time = (datetime.now() - time).total_seconds()
-                logging.info("faces found {} with scores {} detection_phase_number {} time {} frame {}".format(
-                    face_names, scores, face_detected, delta_time, frame_number))
+                logging.info("time {} frame {} faces found {} with scores {} detection_phase_number {} ".format(
+                    delta_time, frame_number, face_names, scores, face_detected))
                 face_locations = [self.mult_location_by_ratio(face_cor) for face_cor in face_locations]
 
             self.box_drawer.draw_faces(frame, box_config, face_locations, face_names, scores)

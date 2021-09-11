@@ -8,9 +8,10 @@ from deepface import DeepFace
 import time
 # import recognition
 
-increase_ratio = 5
+increase_ratio = 10
 metric = 'cosine'  # ['cosine', 'euclidean', 'euclidean_l2']
 detector_backend = 'mtcnn'
+video = 'wed'
 
 
 def save_video(video_path: str, output: str):
@@ -21,7 +22,7 @@ def save_video(video_path: str, output: str):
     v.create_movie(input_movie, output, BoxConfig())
 
 
-save_video("videos/wed.mp4", "wed_5_+{}_{}_{}_align.avi".format(increase_ratio, metric, detector_backend))
+save_video("videos/{}.mp4.".format(video), video + "+{}_{}_{}_Facenet512.avi".format(increase_ratio, metric, detector_backend))
 # save_video("imgs/ofir_amit.mp4", "ofir_amit.avi")
 # save_bphoto(r'imgs_test/yaniv_adi_and_other.jpg', 'temp.jpg')
 # names = ["retinaface",  "opencv", "ssd", "dlib"]
@@ -32,7 +33,6 @@ save_video("videos/wed.mp4", "wed_5_+{}_{}_{}_align.avi".format(increase_ratio, 
 #
 #
 
-path = "test.jpg"
 s = SSDDetection()
 
 

@@ -12,6 +12,7 @@ from detect_picture import DetectImage
 from draw_faces import BoxConfig, Draw
 from recognition import DeepFaceModel, DetectFace
 from multiprocessing.pool import ThreadPool, ApplyResult
+import server_config
 
 HOST, PORT = "127.0.0.1", 9879
 os.makedirs("servers/logs", exist_ok=True)
@@ -20,8 +21,9 @@ logging.basicConfig(filename="servers/logs/{}.txt".format(datetime.now().strftim
 
 class MyTCPHandler(socketserver.BaseRequestHandler):
     def handle(self) -> None:
-        detection = DetectImage(tolerance=0.15, increase_ratio=5)
-        recognition = DeepFaceModel('imgs_test', distance_metric='cosine', detector_backend='mtcnn')
+        detection = DetectImage(tolerance=server_config.tolerance, increase_ratio=server_config.increase_ratio)
+        recognition = DeepFaceModel(server_config.img_folder, distance_metric=server_config.distance_metric,
+                                    detector_backend=server_config.detector_backend)
         box_config = BoxConfig()
         box_drawer = Draw()
         frame_number = 0
@@ -62,8 +64,8 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         start = datetime.now()
         face_locations, face_names, scores, face_detected = face_detector.detect(rgb_frame, face_recognizer)
         delta_time = (datetime.now() - start).total_seconds()
-        logging.info("frame {} faces {} scores {} detection_phase_number {} time {} frame {}".format(
-            frame_number, face_names, scores, face_detected, delta_time, frame_number))
+        logging.info("time {} frame {} faces {} scores {} detection_phase_number {}".format(
+            delta_time,frame_number,  face_names, scores, face_detected, ))
         face_locations = [self.mult_location_by_ratio(face_cor, resize_ratio) for face_cor in face_locations]
         return face_locations, face_names, scores
 
