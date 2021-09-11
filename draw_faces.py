@@ -6,7 +6,7 @@ class BoxConfig:
     def __init__(self,
                  known_face_color=green,
                  unknown_face_color=red,
-                 known_face_text=black,
+                 known_face_text=green,
                  unknown_face_text=white,
                  box_thickness=3):
         self.known_face_color = known_face_color
@@ -17,11 +17,13 @@ class BoxConfig:
 
 
 class Draw:
-    def draw_faces(self, frame, box_config: BoxConfig, face_locations, face_names, scores):
+    def draw_faces(self, frame, box_config: BoxConfig, face_locations, face_names, scores, print_scores=True):
         # Label the results
         for (top, right, bottom, left), name, score in zip(face_locations, face_names, scores):
             if name:
-                text = "{}  {}%".format(name, score)
+                text = name
+                if print_scores:
+                    text += " {}".format(score)
                 self._draw(frame, top, right, bottom, left,
                            text=text,
                            frame_color=box_config.known_face_color,
@@ -29,7 +31,7 @@ class Draw:
                            box_thickness=box_config.box_thickness, )
             else:
                 self._draw(frame, top, right, bottom, left,
-                           text="unknown",
+                           text="",
                            frame_color=box_config.unknown_face_color,
                            text_color=box_config.unknown_face_text,
                            box_thickness=box_config.box_thickness, )
@@ -42,6 +44,6 @@ class Draw:
         cv2.rectangle(frame, (left, top), (right, bottom), frame_color, box_thickness)
 
         # Draw a label with a name below the face
-        cv2.rectangle(frame, (left, bottom - 25), (right, bottom), frame_color, cv2.FILLED)
+        # cv2.rectangle(frame, (left, bottom - 25), (right, bottom), frame_color)
         font = cv2.FONT_HERSHEY_DUPLEX
-        cv2.putText(frame, text, (left + 6, bottom - 6), font, 0.5, text_color, 1)
+        cv2.putText(frame, text, (int((left + right) / 2), bottom - 6), font, 0.5, text_color, 1)

@@ -24,7 +24,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         detection = DetectImage(tolerance=server_config.tolerance, increase_ratio=server_config.increase_ratio)
         recognition = DeepFaceModel(server_config.img_folder, distance_metric=server_config.distance_metric,
                                     detector_backend=server_config.detector_backend)
-        box_config = BoxConfig()
+        box_config = BoxConfig(box_thickness=server_config.box_thickness)
         box_drawer = Draw()
         frame_number = 0
         face_locations, face_names, scores = [], [], []
@@ -44,7 +44,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 face_locations, face_names, scores = result.get()
                 result = pool.apply_async(self.find_faces, args=(frame, frame_number, detection, recognition))
 
-            box_drawer.draw_faces(frame, box_config, face_locations, face_names, scores)
+            box_drawer.draw_faces(frame, box_config, face_locations, face_names, scores, print_scores=False)
             # Write the resulting image to the output video file
             frame_number += 1
 
