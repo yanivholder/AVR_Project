@@ -6,6 +6,7 @@ import camera_stream.camera_streamer as cam_streamer
 
 HOST, PORT = "localhost", 9879
 
+
 def main():
     # Define a video capture object
     cap = cv2.VideoCapture(0)
@@ -41,7 +42,6 @@ def main():
             cv2.imshow('updated_data', updated_data)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
-            print(counter)
             counter += 1
     cap.release()
     cv2.destroyAllWindows()

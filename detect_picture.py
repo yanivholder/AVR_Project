@@ -27,7 +27,7 @@ class DetectImage:
         scores = []
         face_locations = []
 
-        if len(faces):
+        if len(faces) > 0:
             pool = ThreadPool(len(faces))
             res = pool.map(detect_face_wrap, zip(faces, range(len(faces))))
 

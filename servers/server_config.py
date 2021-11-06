@@ -7,7 +7,7 @@ increase_ratio = 5
 img_folder = 'imgs_test'
 distance_metric = 'cosine'
 detector_backend = 'mtcnn'
-recognition_threshold = 0.1
+recognition_threshold = 0.2
 
 # draw config
 box_thickness = 1
