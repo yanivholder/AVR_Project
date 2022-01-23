@@ -5,17 +5,17 @@ from threading import Thread
 
 import cv2
 import logging
-import camera_stream.camera_streamer as cam_streamer
+from multiprocessing.pool import ThreadPool, ApplyResult
 from datetime import datetime
 
 from detect_picture import DetectImage
 from draw_faces import BoxConfig, Draw
 from recognition import DeepFaceModel, DetectFace
-from multiprocessing.pool import ThreadPool, ApplyResult
-import server_config
+import camera_stream.camera_streamer as cam_streamer
+import servers.server_config as server_config
 
 # HOST, PORT = "127.0.0.1", 9879
-HOST, PORT = "132.68.39.159", 9879
+HOST, PORT = '', 9879
 
 os.makedirs("servers/logs", exist_ok=True)
 logging.basicConfig(filename="servers/logs/{}.txt".format(datetime.now().strftime("%m_%d_%H_%M")), filemode='w', level=logging.INFO)
@@ -76,6 +76,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
 
 
 if __name__ == "__main__":
+
     # Create the server and bind it to localhost on port 9879
     with socketserver.TCPServer((HOST, PORT), MyTCPHandler) as server:
         # This will run forever until you interrupt the program
