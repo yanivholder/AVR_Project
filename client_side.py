@@ -2,10 +2,10 @@ import socket
 import cv2
 from datetime import datetime
 
-import camera_stream.camera_streamer as cam_streamer
+import our_code.camera_stream.camera_streamer as cam_streamer
 
-# HOST, PORT = "localhost", 9879
-HOST, PORT = "132.68.39.159", 9879
+HOST, PORT = "localhost", 9879
+# HOST, PORT = "132.68.39.159", 9879
 
 
 def main():

@@ -1,5 +1,5 @@
 from typing import List
-import recognition
+from our_code import recognition
 import numpy as np
 
 

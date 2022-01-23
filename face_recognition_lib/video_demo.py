@@ -1,4 +1,4 @@
-import recognition
+from our_code import recognition
 import cv2
 from face_recognition_lib.utils import Detect
 

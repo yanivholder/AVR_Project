@@ -1,9 +1,6 @@
 import abc
-import tempfile
-import time
 import os
 import pickle
-import cv2
 import pandas as pd
 from tqdm import tqdm
 from os import path
@@ -11,10 +8,10 @@ from abc import ABC
 
 from deepface.commons import distance as dst
 from deepface import DeepFace
-from deepface.basemodels import DeepID, DlibResNet, VGGFace, DlibWrapper, ArcFace, FbDeepFace, Facenet512, Facenet
-from ImgParser import Parser
+from deepface.basemodels import Facenet512
 
-from servers.server_config import recognition_threshold
+from our_code.ImgParser import Parser
+from our_code.server_config import recognition_threshold
 
 
 class DetectFace:

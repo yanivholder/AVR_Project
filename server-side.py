@@ -1,24 +1,22 @@
 import os.path
 import socketserver
-import time
-from threading import Thread
 
 import cv2
 import logging
 from multiprocessing.pool import ThreadPool, ApplyResult
 from datetime import datetime
 
-from detect_picture import DetectImage
-from draw_faces import BoxConfig, Draw
-from recognition import DeepFaceModel, DetectFace
-import camera_stream.camera_streamer as cam_streamer
-import servers.server_config as server_config
+from our_code.detect_picture import DetectImage
+from our_code.draw_faces import BoxConfig, Draw
+from our_code.recognition import DeepFaceModel, DetectFace
+import our_code.camera_stream.camera_streamer as cam_streamer
+import our_code.server_config as server_config
 
-# HOST, PORT = "127.0.0.1", 9879
-HOST, PORT = '', 9879
+HOST, PORT = "127.0.0.1", 9879
+# HOST, PORT = '', 9879
 
-os.makedirs("servers/logs", exist_ok=True)
-logging.basicConfig(filename="servers/logs/{}.txt".format(datetime.now().strftime("%m_%d_%H_%M")), filemode='w', level=logging.INFO)
+os.makedirs("logs", exist_ok=True)
+logging.basicConfig(filename="logs/{}.txt".format(datetime.now().strftime("%m_%d_%H_%M")), filemode='w', level=logging.INFO)
 
 
 class MyTCPHandler(socketserver.BaseRequestHandler):

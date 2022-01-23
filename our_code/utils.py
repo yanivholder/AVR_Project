@@ -1,7 +1,7 @@
 from draw_faces import BoxConfig
 from video import VideoDetection
 # # from detect_picture import DetectImage
-from detection import SSDDetection
+from our_code.detection import SSDDetection
 import cv2
 import os
 from deepface import DeepFace
@@ -16,7 +16,7 @@ video = 'wed'
 
 def save_video(video_path: str, output: str):
     input_movie = cv2.VideoCapture(video_path)
-    v = VideoDetection(known_img_path='imgs_test', frame_ratio=5, increase_ratio=increase_ratio,
+    v = VideoDetection(known_img_path='../images', frame_ratio=5, increase_ratio=increase_ratio,
                        detector_backend=detector_backend, distance_metric=metric,
                        )
     v.create_movie(input_movie, output, BoxConfig())
@@ -24,7 +24,7 @@ def save_video(video_path: str, output: str):
 
 save_video("videos/{}.mp4.".format(video), video + "+{}_{}_{}_Facenet512.avi".format(increase_ratio, metric, detector_backend))
 # save_video("imgs/ofir_amit.mp4", "ofir_amit.avi")
-# save_bphoto(r'imgs_test/yaniv_adi_and_other.jpg', 'temp.jpg')
+# save_bphoto(r'images/yaniv_adi_and_other.jpg', 'temp.jpg')
 # names = ["retinaface",  "opencv", "ssd", "dlib"]
 # for m_name in names:
 #     start_time = time.clock()

@@ -1,5 +1,6 @@
 import cv2
-from colors_config import green, red, white, black
+
+from our_code.colors_config import green, red, white, black
 
 
 class BoxConfig:

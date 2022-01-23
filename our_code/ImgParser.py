@@ -1,6 +1,7 @@
 import os
-import recognition
 import re
+
+import our_code.recognition as recognition
 
 
 class Parser(object):

@@ -2,10 +2,10 @@ import cv2
 import logging
 from datetime import datetime
 from cv2 import VideoCapture
-from draw_faces import BoxConfig, Draw
+from our_code.draw_faces import BoxConfig, Draw
 
-from detect_picture import DetectImage
-from recognition import FaceRecognitionModel, DetectFace, DeepFaceModel
+from our_code.detect_picture import DetectImage
+from our_code.recognition import DetectFace, DeepFaceModel
 
 # This is a demo of running face recognition on a video file and saving the results to a new video file.
 #

@@ -1,8 +1,8 @@
 .idea/
 __pycache__/
 */__pycache__/
-servers/servers/
-*/logs/
+*/*/__pycache__/
+logs/
 condaenv.0pnzf1jn.requirements.txt
 */representations_Facenet512_mtcnn.pkl
 model_ir_se50.pth
