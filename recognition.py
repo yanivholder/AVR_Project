@@ -116,7 +116,7 @@ class DeepFaceModel(DetectFace, ABC):
         for r, d, f in os.walk(self.img_path):  # r=root, d=directories, f = files
             for file in f:
                 if ('.jpg' in file.lower()) or ('.png' in file.lower()):
-                    exact_path = r + "\\" + file
+                    exact_path = os.path.join(r, file)
                     employees.append(exact_path)
 
         if len(employees) == 0:
@@ -134,7 +134,7 @@ class DeepFaceModel(DetectFace, ABC):
         for index in pbar:
             employee = employees[index]
             instance = []
-            instance.append(employee.split('\\')[-2])
+            instance.append(employee.split(os.sep)[-2])
             representation = DeepFace.represent(img_path=employee,
                                                 model_name=self.model_name,
                                                 model=self.model,

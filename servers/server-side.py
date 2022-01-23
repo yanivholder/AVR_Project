@@ -14,7 +14,9 @@ from recognition import DeepFaceModel, DetectFace
 from multiprocessing.pool import ThreadPool, ApplyResult
 import server_config
 
-HOST, PORT = "127.0.0.1", 9879
+# HOST, PORT = "127.0.0.1", 9879
+HOST, PORT = "132.68.39.159", 9879
+
 os.makedirs("servers/logs", exist_ok=True)
 logging.basicConfig(filename="servers/logs/{}.txt".format(datetime.now().strftime("%m_%d_%H_%M")), filemode='w', level=logging.INFO)
 
