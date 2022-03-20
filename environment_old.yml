@@ -1,0 +1,11 @@
+name: avr
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - pip
+  - pip:
+    - deepface
+    - mtcnn-opencv
+  - kivy
+  - twisted
