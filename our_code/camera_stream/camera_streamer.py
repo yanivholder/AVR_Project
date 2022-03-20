@@ -22,14 +22,14 @@ def gen_frame():
     return frame
 
 
-def get_frame_from_socket(sock):
-    data = b''
-
-    while len(data) < payload_size:
-        packet = sock.recv(RECV_SIZE)
-        if not packet:
-            break
-        data += packet
+def unpickle_data(data):
+    # data = b''
+    #
+    # while len(data) < payload_size:
+    #     packet = sock.recv(RECV_SIZE)
+    #     if not packet:
+    #         break
+    #     data += packet
 
     packed_msg_size = data[:payload_size]
     data = data[payload_size:]
@@ -44,7 +44,7 @@ def get_frame_from_socket(sock):
     return frame
 
 
-def pickle_data_for_packet(data):
+def pickle_data(data):
     pickled_data = pickle.dumps(data)
     message = struct.pack('Q', len(pickled_data)) + pickled_data
     return message

@@ -33,6 +33,9 @@ class ServerAnswer(Protocol):
     """This class will be instantiated for each server connection"""
 
     def dataReceived(self, data: bytes):
+
+
+
         response = self.factory.app.handle_message(data)
         if response:
             self.transport.write(response)
