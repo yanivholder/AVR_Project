@@ -71,22 +71,23 @@ class ClientApp(App):
     def on_connection(self, transport):
         print("Connected successfully!")
         self.transport = transport
-
+        self.transport.write('Hello world'.encode('utf-8'))
 
     def data_received(self, data):
-        # Receive data back from the server
-        frame = cam_streamer.get_frame_from_socket(data)
-        (datetime.now() - self.time).total_seconds()
-
-
-        # Show the frames in a screen.
-        buf1 = cv2.flip(frame, 0)
-        buf = buf1.tostring()
-        texture1 = Texture.create(size=(frame.shape[1], frame.shape[0]), colorfmt='bgr')
-        texture1.blit_buffer(buf, colorfmt='bgr', bufferfmt='ubyte')
-        # display image from the texture
-        self.img1.texture = texture1
-        self.counter += 1
+        print(data)
+        # # Receive data back from the server
+        # frame = cam_streamer.get_frame_from_socket(data)
+        # (datetime.now() - self.time).total_seconds()
+        #
+        # # Show the frames in a screen.
+        # buf1 = cv2.flip(frame, 0)
+        # buf = buf1.tostring()
+        # texture1 = Texture.create(size=(frame.shape[1], frame.shape[0]), colorfmt='bgr')
+        # texture1.blit_buffer(buf, colorfmt='bgr', bufferfmt='ubyte')
+        #
+        # # display image from the texture
+        # self.img1.texture = texture1
+        # self.counter += 1
 
     def generate_msg_to_server(self):
         # Capture one frame
@@ -97,7 +98,7 @@ class ClientApp(App):
 
         # Send the data
         self.time = datetime.now()
-        message = cam_streamer.pickle_data_for_packet(frame)
+        message = frame
         self.transport.write(message)
         # logging.info("frame {}  time {} ".format(counter,  (datetime.now() - time).total_seconds()))
 
