@@ -23,20 +23,13 @@ def gen_frame():
 
 
 def unpickle_data(data):
-    # data = b''
-    #
-    # while len(data) < payload_size:
-    #     packet = sock.recv(RECV_SIZE)
-    #     if not packet:
-    #         break
-    #     data += packet
 
     packed_msg_size = data[:payload_size]
     data = data[payload_size:]
     msg_size = struct.unpack("Q", packed_msg_size)[0]
 
-    while len(data) < msg_size:
-        data += sock.recv(RECV_SIZE)
+    # while len(data) < msg_size:
+    #     data += sock.recv(RECV_SIZE)
 
     frame_data = data[:msg_size]
     data = data[msg_size:]

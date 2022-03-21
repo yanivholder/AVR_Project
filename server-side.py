@@ -1,4 +1,6 @@
 import os.path
+import pickle
+import struct
 
 from kivy.support import install_twisted_reactor
 
@@ -22,6 +24,9 @@ from our_code.recognition import DeepFaceModel, DetectFace
 import our_code.camera_stream.camera_streamer as cam_streamer
 import our_code.server_config as server_config
 
+payload_size = struct.calcsize("Q")
+RECV_SIZE = 4 * 1024  # 4 KB
+
 HOST, PORT = "127.0.0.1", 9879
 # HOST, PORT = '', 9879
 
@@ -33,9 +38,6 @@ class ServerAnswer(Protocol):
     """This class will be instantiated for each server connection"""
 
     def dataReceived(self, data: bytes):
-
-
-
         response = self.factory.app.handle_message(data)
         if response:
             self.transport.write(response)
@@ -52,6 +54,8 @@ class ServerApp(App):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.data = b''
+        self.msg_size = None
         # self.detection = DetectImage(tolerance=server_config.tolerance, increase_ratio=server_config.increase_ratio)
         # self.recognition = DeepFaceModel(server_config.img_folder, distance_metric=server_config.distance_metric,
         #                             detector_backend=server_config.detector_backend)
@@ -69,7 +73,22 @@ class ServerApp(App):
         return self.label
 
     def handle_message(self, msg):
-        return msg
+        if len(self.data) < payload_size:
+            self.data += msg
+            packed_msg_size = self.data[:payload_size]
+            self.data = self.data[payload_size:]
+            self.msg_size = struct.unpack("Q", packed_msg_size)[0]
+            return
+
+        self.data += msg
+
+        if len(self.data) >= self.msg_size:
+            frame = pickle.loads(self.data)
+            #  do something
+            self.data = b''
+            self.msg_size = 0
+            return cam_streamer.pickle_data(frame)
+
         #     # Manipulate the
         #     if first_run:
         #         result: ApplyResult = pool.apply_async(self.find_faces, args=(frame, frame_number, detection, recognition))

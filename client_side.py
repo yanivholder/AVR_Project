@@ -1,3 +1,5 @@
+import struct
+
 from kivy.support import install_twisted_reactor
 
 install_twisted_reactor()
@@ -16,6 +18,9 @@ from datetime import datetime
 import time
 
 import our_code.camera_stream.camera_streamer as cam_streamer
+
+payload_size = struct.calcsize("Q")
+RECV_SIZE = 4 * 1024  # 4 KB
 
 HOST, PORT = "localhost", 9879
 # HOST, PORT = "132.68.39.159", 9879
@@ -50,8 +55,6 @@ class ClientApp(App):
     textbox = None
     label = None
     transport = None
-    current_msg_size = 0
-    current_data_received = b''
 
     def build(self):
         # Define a video capture object
@@ -59,6 +62,8 @@ class ClientApp(App):
         if not self.cap.isOpened():
             raise IOError("Cannot open webcam")
         self.counter = 1
+        self.current_msg_size = 0
+        self.current_data_received = b''
 
         root = self.setup_gui()
         self.connect_to_server()
@@ -79,27 +84,33 @@ class ClientApp(App):
     def on_connection(self, transport):
         print("Connected successfully!")
         self.transport = transport
-        Clock.schedule_interval(self.send_image_to_server, 1.0)
+        while True:
+            self.send_image_to_server()
 
     def send_image_to_server(self):
         # display image from cam in opencv window
         ret, frame = self.cap.read()
 
         # Send the frame to the server
-        self.transport.write(
-            cam_streamer.pickle_data(frame)
-        )
+        frame_bytes = cam_streamer.pickle_data(frame)
+        self.transport.write(frame_bytes)
 
-    def data_received(self, data):
+    def data_received(self, msg):
+        if len(self.current_data_received) < payload_size:
+            packed_msg_size = msg[:payload_size]
+            self.current_data_received = msg[payload_size:]
+            self.current_msg_size = struct.unpack("Q", packed_msg_size)[0]
+            return
 
-        if len(self.current_data_received) < cam_streamer.payload_size:
-            self.current_data_received += data
-        else:
+        self.current_data_received += msg
+
+        if len(self.current_data_received) >= self.current_msg_size:
             # The whole image received
             # (datetime.now() - self.time).total_seconds()
             frame = cam_streamer.unpickle_data(self.current_data_received)
             self.show_image(frame)
-            self.current_data_received = b'' + data
+            self.current_data_received = b''
+            self.current_msg_size = 0
 
     def show_image(self, frame):
         # Show the frames in a screen.
