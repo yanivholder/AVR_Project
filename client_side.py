@@ -102,6 +102,7 @@ class ClientApp(App):
         self.counter = 1
         self.current_msg_size = 0
         self.current_data_received = b''
+        self.got_response = True
 
     def build(self):
         # Define a video capture object
@@ -128,20 +129,20 @@ class ClientApp(App):
     def on_connection(self, transport):
         print("Connected successfully!")
         self.transport = transport
-        Clock.schedule_interval(self.show_video, 1.0)
+        Clock.schedule_interval(self.show_video, 1.0 / 32)
 
     def show_video(self, dt):
         # display image from cam in opencv window
         ret, frame = self.cap.read()
 
         # Send the frame to the server
-        if self.current_data_received == b'':
+        if self.current_data_received == b'' and self.got_response:
             frame_bytes = cam_streamer.pickle_data(frame)
             self.transport.write(frame_bytes)
+            self.got_response = False
             print("data send")
 
         self.box_drawer.draw_faces(frame, self.box_config, self.location, self.names, self.scores, print_scores=False)
-        cv2.imshow('updated_data', frame)
         self.show_image(frame)
 
     def data_received(self, msg):
@@ -150,15 +151,15 @@ class ClientApp(App):
             packed_msg_size = msg[:payload_size]
             self.current_data_received = msg[payload_size:]
             self.current_msg_size = struct.unpack("Q", packed_msg_size)[0]
-            return
-
-        self.current_data_received += msg
+        else:
+            self.current_data_received += msg
 
         if len(self.current_data_received) >= self.current_msg_size:
-            # assert len(self.current_data_received) == self.current_msg_size
+            assert len(self.current_data_received) == self.current_msg_size
             self.location, self.names, self.scores = pickle.loads(self.current_data_received)
             self.current_data_received = b''
             self.current_msg_size = 0
+            self.got_response = True
 
     def show_image(self, frame):
         # Show the frames in a screen.

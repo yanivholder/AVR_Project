@@ -1,6 +1,7 @@
 import os.path
 import pickle
 import struct
+from time import sleep
 
 from kivy.support import install_twisted_reactor
 
@@ -15,11 +16,9 @@ from kivy.uix.label import Label
 
 import cv2
 import logging
-from multiprocessing.pool import ThreadPool, ApplyResult
 from datetime import datetime
 
 from our_code.detect_picture import DetectImage
-from our_code.draw_faces import BoxConfig, Draw
 from our_code.recognition import DeepFaceModel, DetectFace
 import our_code.camera_stream.camera_streamer as cam_streamer
 import our_code.server_config as server_config
@@ -31,7 +30,7 @@ HOST, PORT = "127.0.0.1", 9879
 # HOST, PORT = '', 9879
 
 os.makedirs("logs", exist_ok=True)
-logging.basicConfig(filename="logs/{}.txt".format(datetime.now().strftime("%m_%d_%H_%M")), filemode='w', level=logging.INFO)
+logging.basicConfig(filename="server_logs/{}.txt".format(datetime.now().strftime("%m_%d_%H_%M")), filemode='w', level=logging.INFO)
 
 
 class ServerAnswer(Protocol):
@@ -59,9 +58,6 @@ class ServerApp(App):
         self.detection = DetectImage(tolerance=server_config.tolerance, increase_ratio=server_config.increase_ratio)
         self.recognition = DeepFaceModel(server_config.img_folder, distance_metric=server_config.distance_metric,
                                     detector_backend=server_config.detector_backend)
-        self.face_locations, face_names, scores = [], [], []
-        self.pool = ThreadPool()
-        self.first_run = True
         self.label = None
 
     def build(self):
@@ -70,7 +66,8 @@ class ServerApp(App):
         return self.label
 
     def handle_message(self, msg):
-        print("server recive")
+        print("server receive")
+        sleep(0.1)
         if len(self.data) < payload_size:
             self.data += msg
             packed_msg_size = self.data[:payload_size]
@@ -89,7 +86,7 @@ class ServerApp(App):
             return result
 
     def handle_single_frame(self, frame):
-        result = self.find_faces(frame, self.detection, self.recognition)
+        result = self.find_faces(frame, self.detection, self.recognition, resize_ratio=0.5)
         pickle_result = cam_streamer.pickle_data(result)
         return pickle_result
 
@@ -105,8 +102,8 @@ class ServerApp(App):
         start = datetime.now()
         face_locations, face_names, scores, face_detected = face_detector.detect(rgb_frame, face_recognizer)
         delta_time = (datetime.now() - start).total_seconds()
-        # logging.info("time {} frame {} faces {} scores {} detection_phase_number {}".format(
-        #     delta_time, frame_number, face_names, scores, face_detected, ))
+        logging.info("time {} faces {} scores {} detection_phase_number {}".format(
+            delta_time, face_names, scores, face_detected, ))
         face_locations = [self.mult_location_by_ratio(face_cor, resize_ratio) for face_cor in face_locations]
         return face_locations, face_names, scores
 
