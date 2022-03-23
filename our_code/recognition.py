@@ -1,4 +1,5 @@
 import abc
+import logging
 import os
 import pickle
 import pandas as pd
@@ -66,6 +67,10 @@ class DeepFaceModel(DetectFace, ABC):
         return self.deep_face_find_rewrite(target_face)
 
     def deep_face_find_rewrite(self, img_path):
+
+        if not os.path.isfile(self.representation_path):
+            return None, None
+
         representations = pickle.load(open(self.representation_path, "rb"))
         df = pd.DataFrame(representations, columns=["identity", "%s_representation" % (self.model_name)])
 
@@ -101,9 +106,10 @@ class DeepFaceModel(DetectFace, ABC):
         else:
             return None, None
 
-    def crate_representation_from_model(self):
-        if path.exists(self.representation_path):
-            print("WARNING: Representations for images in ", self.img_path, " folder were previously stored in ", self.representation_path,
+    def crate_representation_from_model(self, representation_exists_ok=False):
+
+        if path.exists(self.representation_path) and not representation_exists_ok:
+            logging.warning("WARNING: Representations for images in ", self.img_path, " folder were previously stored in ", self.representation_path,
                   ". If you added new instances after this file creation, then please delete this file and call find function again. It will create it again.")
             return
 
@@ -116,38 +122,36 @@ class DeepFaceModel(DetectFace, ABC):
                     exact_path = os.path.join(r, file)
                     employees.append(exact_path)
 
-        if len(employees) == 0:
-            raise ValueError("There is no image in ", self.img_path,
-                             " folder! Validate .jpg or .png files exist in this path.")
+        if len(employees) > 0:
 
-        # ------------------------
-        # find representations for db images
+            # ------------------------
+            # find representations for db images
 
-        representations = []
+            representations = []
 
-        pbar = tqdm(range(0, len(employees)), desc='Finding representations')
+            pbar = tqdm(range(0, len(employees)), desc='Finding representations')
 
-        # for employee in employees:
-        for index in pbar:
-            employee = employees[index]
-            instance = []
-            instance.append(employee.split(os.sep)[-2])
-            representation = DeepFace.represent(img_path=employee,
-                                                model_name=self.model_name,
-                                                model=self.model,
-                                                enforce_detection=False,
-                                                detector_backend=self.detector_backend,
-                                                align=True
-                                                )
+            # for employee in employees:
+            for index in pbar:
+                employee = employees[index]
+                instance = []
+                instance.append(employee.split(os.sep)[-2])
+                representation = DeepFace.represent(img_path=employee,
+                                                    model_name=self.model_name,
+                                                    model=self.model,
+                                                    enforce_detection=False,
+                                                    detector_backend=self.detector_backend,
+                                                    align=True
+                                                    )
 
-            instance.append(representation)
-        # -------------------------------
+                instance.append(representation)
+            # -------------------------------
 
-            representations.append(instance)
+                representations.append(instance)
 
-        f = open(self.representation_path, "wb")
-        pickle.dump(representations, f)
-        f.close()
+            f = open(self.representation_path, "wb")
+            pickle.dump(representations, f)
+            f.close()
 
         print("Representations stored in ", self.img_path, "/", self.representation_path,
               " file. Please delete this file when you add new identities in your database.")

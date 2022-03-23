@@ -1,5 +1,7 @@
 import os.path
 import pickle
+import random
+import shutil
 import struct
 from time import sleep
 
@@ -50,13 +52,16 @@ class ServerAnswerFactory(Factory):
 
 
 class ServerApp(App):
-
+    server_db = 'server_db'
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.imgs_folder = f'{self.server_db}/server_{random.getrandbits(128)}'
+        os.makedirs(self.server_db, exist_ok=True)
         self.data = b''
         self.msg_size = None
+
         self.detection = DetectImage(tolerance=server_config.tolerance, increase_ratio=server_config.increase_ratio)
-        self.recognition = DeepFaceModel(server_config.img_folder, distance_metric=server_config.distance_metric,
+        self.recognition = DeepFaceModel(self.imgs_folder, distance_metric=server_config.distance_metric,
                                     detector_backend=server_config.detector_backend)
         self.label = None
 
@@ -67,7 +72,7 @@ class ServerApp(App):
 
     def handle_message(self, msg):
         print("server receive")
-        sleep(0.1)
+        sleep(0.03)
         if len(self.data) < payload_size:
             self.data += msg
             packed_msg_size = self.data[:payload_size]
@@ -79,11 +84,26 @@ class ServerApp(App):
 
         if len(self.data) >= self.msg_size:
             print("server end")
-            frame = pickle.loads(self.data)
-            result = self.handle_single_frame(frame)
+            data = pickle.loads(self.data)
             self.data = b''
             self.msg_size = 0
+            #imges
+            if len(data) == 2 and data[0] == 'imgs':
+                self.handle_new_imgs(data[1])
+                result = b''
+            #single frame
+            else:
+                result = self.handle_single_frame(data)
+
             return result
+
+    def handle_new_imgs(self, imgs):
+        shutil.rmtree(self.imgs_folder, ignore_errors=True)
+        os.mkdir(self.imgs_folder)
+        for i, (name, img) in enumerate(imgs):
+            os.makedirs(os.path.join(self.imgs_folder, name), exist_ok=True)
+            cv2.imwrite(os.path.join(self.imgs_folder, name, f'{i}.png'), cv2.cvtColor(img, cv2.COLOR_RGB2BGR))
+        self.recognition.crate_representation_from_model()
 
     def handle_single_frame(self, frame):
         result = self.find_faces(frame, self.detection, self.recognition, resize_ratio=0.5)
