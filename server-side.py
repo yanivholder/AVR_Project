@@ -32,8 +32,9 @@ HOST, PORT = "127.0.0.1", 9879
 # HOST, PORT = '', 9879
 
 os.makedirs("logs", exist_ok=True)
-logging.basicConfig(filename="server_logs/{}.txt".format(datetime.now().strftime("%m_%d_%H_%M")), filemode='w', level=logging.INFO)
+# logging.basicConfig(filename="server_logs/{}.txt".format(datetime.now().strftime("%m_%d_%H_%M")), filemode='w', level=logging.INFO)
 
+logging.basicConfig(level=logging.DEBUG)
 
 class ServerAnswer(Protocol):
     """This class will be instantiated for each server connection"""
@@ -71,26 +72,26 @@ class ServerApp(App):
         return self.label
 
     def handle_message(self, msg):
-        print("server receive")
+        logging.debug("server receive data")
         sleep(0.03)
         if len(self.data) < payload_size:
             self.data += msg
             packed_msg_size = self.data[:payload_size]
             self.data = self.data[payload_size:]
             self.msg_size = struct.unpack("Q", packed_msg_size)[0]
-            return
+            return None
 
         self.data += msg
 
         if len(self.data) >= self.msg_size:
-            print("server end")
+            logging.debug("server receive a whole message end")
             data = pickle.loads(self.data)
             self.data = b''
             self.msg_size = 0
             #imges
             if len(data) == 2 and data[0] == 'imgs':
                 self.handle_new_imgs(data[1])
-                result = b''
+                result = cam_streamer.pickle_data('images loaded')
             #single frame
             else:
                 result = self.handle_single_frame(data)

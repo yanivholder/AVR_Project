@@ -16,7 +16,7 @@ video = 'wed'
 
 def save_video(video_path: str, output: str):
     input_movie = cv2.VideoCapture(video_path)
-    v = VideoDetection(known_img_path='../images', frame_ratio=5, increase_ratio=increase_ratio,
+    v = VideoDetection(known_img_path='../tests/images', frame_ratio=5, increase_ratio=increase_ratio,
                        detector_backend=detector_backend, distance_metric=metric,
                        )
     v.create_movie(input_movie, output, BoxConfig())

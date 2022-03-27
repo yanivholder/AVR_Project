@@ -1,7 +1,10 @@
+import logging
+from datetime import datetime
 from multiprocessing.pool import ThreadPool
 
 from our_code.recognition import DetectFace
 from our_code.detection import SSDDetection, Mtcnn
+
 
 class DetectImage:
     def __init__(self, tolerance: float, increase_ratio: int = 0):
@@ -20,7 +23,9 @@ class DetectImage:
                 return "error", "error", "error"
 
         # Find all the faces and face encodings in the current frame of video
+        start = datetime.now()
         face_suggestion = self.detection_model.detect_picture(frame)
+        logging.info(f"detection time: {(datetime.now() - start).total_seconds()}")
         faces = [frame[face_cor[0]: face_cor[2], face_cor[3]: face_cor[1]] for face_cor in face_suggestion]
 
         face_names = []

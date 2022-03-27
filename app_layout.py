@@ -115,6 +115,8 @@ class Recognize(BoxLayout):
 
         self.play_state = False
         self.cap = cv2.VideoCapture(0)
+        self.desktop_img = Image('client_db/desktop.png')
+        self.ids['video'].texture = self.desktop_img.texture
 
         # init drawer objects
         self.box_config = BoxConfig(box_thickness=server_config.box_thickness)
@@ -138,13 +140,17 @@ class Recognize(BoxLayout):
         self.play_state = not self.play_state
 
         if self.play_state:
+            if not self.got_response:
+                self.show_pop_up("server is busy")
+                return
+
             self.ids['play_or_stop_but'].text = "stop"
             self.flush_video()
             Clock.schedule_interval(self.show_video, 1.0 / 8)
         else:
             self.ids['play_or_stop_but'].text = "play"
             Clock.unschedule(self.show_video)
-            self.ids['video'].texture = Image('images/yaniv/yaniv2.jpg').texture
+            self.ids['video'].texture = self.desktop_img.texture
 
     def flush_video(self):
         self.current_data_received = b''
@@ -190,6 +196,8 @@ class Recognize(BoxLayout):
                 self.location, self.names, self.scores = pickle.loads(self.current_data_received)
                 self.current_data_received = b''
                 self.current_msg_size = 0
+            else:
+                self.show_pop_up("images loaded")
             self.got_response = True
 
     def show_image(self, frame):
@@ -216,7 +224,6 @@ class Recognize(BoxLayout):
 
     def load(self, path, _):
         self.dismiss_popup()
-
         if self.send_images_to_server(path):
             txtFName = self.ids['txtFName']
             txtFName.text = f'cur dir - {path}'
