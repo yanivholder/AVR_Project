@@ -1,8 +1,6 @@
 import os
 import re
 
-import our_code.recognition as recognition
-
 
 class Parser(object):
     def __init__(self, root: str):
@@ -26,9 +24,4 @@ class Parser(object):
     def scan_person_folder(self, folder: str):
         imgs = [os.path.join(folder, f) for f in os.listdir(folder) if re.match(r'.*\.(jpg|jpeg|png)', f, flags=re.I)]
         return [self.embad_img(path) for path in imgs]
-
-    @staticmethod
-    def embad_img(path: str):
-        image = recognition.load_image_file(path)
-        return recognition.face_encodings(image)[0]
 

@@ -14,7 +14,7 @@ from app_layout import Recognize
 
 
 HOST, PORT = "localhost", 9879
-# HOST, PORT = "132.68.39.159", 9879
+# HOST, PORT = "192.114.105.254", 9879
 
 
 class AVRClient(protocol.Protocol):
@@ -36,9 +36,11 @@ class AVRClientFactory(protocol.ClientFactory):
 
     def clientConnectionLost(self, connector, reason):
         print('Lost connection.')
+        exit(0)
 
     def clientConnectionFailed(self, connector, reason):
         print('Connection failed.')
+        exit(0)
 
 
 class ClientApp(App):

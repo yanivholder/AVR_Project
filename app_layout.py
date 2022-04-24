@@ -244,7 +244,7 @@ class Recognize(BoxLayout):
                 return False
 
             for img in os.listdir(os.path.join(name_path)):
-                if not img.endswith('jpg') and not img.endswith('png'):
+                if not img.endswith('jpg') and not img.endswith('png') and not img.endswith('jpeg'):
                     return False
                 img_path = os.path.join(name_path, img)
                 imgs.append((fname, np.asarray(PIL.Image.open(img_path))))
